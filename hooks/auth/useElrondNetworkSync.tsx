@@ -33,10 +33,7 @@ import { useEffectOnlyOnUpdate } from '../tools/useEffectOnlyOnUpdate';
 import { isLoginExpired } from '../../utils/expiresAt';
 import { useApiQuery, ApiQueryType } from '../interaction/useApiQuery';
 
-const unsupportedSignMethods = [
-  LoginMethodsEnum.ledger,
-  LoginMethodsEnum.wallet,
-];
+const unsupportedSignMethods = [LoginMethodsEnum.ledger];
 
 export const useElrondNetworkSync = () => {
   const { logout } = useLogout();
