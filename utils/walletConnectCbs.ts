@@ -11,10 +11,8 @@ import { optionalRedirect } from '../utils/optionalRedirect';
 export const WcOnLogin = async (
   dappProvider: WalletConnectProvider,
   proxyProvider: ProxyProvider,
-  token?: string,
   callbackRoute?: string
 ) => {
-  const signature = await dappProvider?.getSignature();
   const address = await dappProvider?.getAddress();
 
   const userAddressInstance = new Address(address);
@@ -30,12 +28,6 @@ export const WcOnLogin = async (
       );
     }
   }
-
-  // Julian, possibly not needed anymore?
-  /* if (signature) {
-    setLoginInfoState('loginToken', String(token));
-    setLoginInfoState('signature', signature);
-  } */
 
   setLoginInfoState('loginMethod', LoginMethodsEnum.walletconnect);
 

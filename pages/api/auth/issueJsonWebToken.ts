@@ -78,7 +78,7 @@ export default function handler(
   const accessToken = jwt.sign(
     payload,
     process.env.JWT_SECRET ?? 'jsonwebtokensecret',
-    { expiresIn: '24h' }
+    { expiresIn: '10s' }
   );
 
   // bit of a hack to get the expiresAt timestamp

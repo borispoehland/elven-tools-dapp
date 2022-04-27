@@ -25,7 +25,7 @@ import {
   DAPP_INIT_ROUTE,
 } from '../../config/network';
 import { getBridgeAddressFromNetwork } from '../../utils/bridgeAddress';
-import { getAddressFromUrl } from '../../utils/getAddressFromUrl';
+import { getParamFromUrl } from '../../utils/getParamFromUrl';
 import { LoginMethodsEnum } from '../../types/enums';
 import { WcOnLogin } from '../../utils/walletConnectCbs';
 import { useLogout } from './useLogout';
@@ -60,6 +60,7 @@ export const useElrondNetworkSync = () => {
     },
     autoInit:
       !unsupportedSignMethods.includes(loginInfoSnap.loginMethod) &&
+      !loginInfoSnap.jwt &&
       Boolean(
         loginInfoSnap.loginToken &&
           loginInfoSnap.signature &&
@@ -160,10 +161,10 @@ export const useElrondNetworkSync = () => {
 
       const loginExpires = loginInfoSnap.expires;
       const accessTokenExpires = loginInfoSnap?.jwt?.expiresAt;
-      if (
-        (loginExpires && isLoginExpired(loginExpires)) ||
-        (accessTokenExpires && isLoginExpired(accessTokenExpires))
-      ) {
+      const loginExpired = loginExpires && isLoginExpired(loginExpires);
+      const accessTokenExpired =
+        accessTokenExpires && isLoginExpired(accessTokenExpires);
+      if (loginExpired || accessTokenExpired) {
         return;
       }
 
@@ -222,7 +223,11 @@ export const useElrondNetworkSync = () => {
             break;
           // Web wallet auth
           case LoginMethodsEnum.wallet:
-            const address = getAddressFromUrl() || accountSnap?.address;
+            const address = getParamFromUrl('address') || accountSnap?.address;
+            const signature = getParamFromUrl('signature');
+            if (signature) {
+              setLoginInfoState('signature', signature);
+            }
             if (address) {
               dappProvider = new WalletProvider(
                 `${networkConfig[chainType].walletAddress}${DAPP_INIT_ROUTE}`
@@ -257,20 +262,24 @@ export const useElrondNetworkSync = () => {
       const accessTokenExpired =
         accessTokenExpires && isLoginExpired(accessTokenExpires);
 
-      if (!loginExpired && !accessTokenExpired && address && proxyProvider) {
-        const userAddressInstance = new Address(address);
-        const userAccountInstance = new Account(userAddressInstance);
-        try {
-          await userAccountInstance.sync(proxyProvider);
-          setAccountState('nonce', userAccountInstance.nonce.valueOf());
-          setAccountState('balance', userAccountInstance.balance.toString());
-          setLoggingInState('loggedIn', Boolean(address));
-        } catch (e: any) {
-          console.warn(
-            `Something went wrong trying to synchronize the user account: ${e?.message}`
-          );
-        }
+      if (loginExpired || accessTokenExpired || !address || !proxyProvider) {
+        setLoggingInState('pending', false);
+        return;
       }
+
+      const userAddressInstance = new Address(address);
+      const userAccountInstance = new Account(userAddressInstance);
+      try {
+        await userAccountInstance.sync(proxyProvider);
+        setAccountState('nonce', userAccountInstance.nonce.valueOf());
+        setAccountState('balance', userAccountInstance.balance.toString());
+        setLoggingInState('loggedIn', Boolean(address));
+      } catch (e: any) {
+        console.warn(
+          `Something went wrong trying to synchronize the user account: ${e?.message}`
+        );
+      }
+
       setLoggingInState('pending', false);
     };
     askForAccount();

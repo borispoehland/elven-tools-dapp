@@ -71,7 +71,6 @@ export const useMobileAppLogin = (params?: Login) => {
         WcOnLogin(
           dappProviderRef.current,
           proxyProvider,
-          params?.token,
           params?.callbackRoute
         );
       },
