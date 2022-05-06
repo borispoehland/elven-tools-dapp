@@ -1,9 +1,8 @@
+import { Address, SignableMessage } from '@elrondnetwork/erdjs';
 import {
-  Address,
   UserPublicKey,
   UserVerifier,
-  SignableMessage,
-} from '@elrondnetwork/erdjs';
+} from '@elrondnetwork/erdjs-walletcore/out';
 import { Signature } from '@elrondnetwork/erdjs/out/signature';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ApiOutput } from '../../../hooks/interaction/useApiQuery';
@@ -78,7 +77,7 @@ export default function handler(
   const accessToken = jwt.sign(
     payload,
     process.env.JWT_SECRET ?? 'jsonwebtokensecret',
-    { expiresIn: '24h' }
+    { expiresIn: '10s' }
   );
 
   // bit of a hack to get the expiresAt timestamp

@@ -4,7 +4,7 @@ import { useLoginInfo } from './useLoginInfo';
 export const useExampleProtectedEndpoint = () => {
   const { jwt } = useLoginInfo();
 
-  useApiQuery({
+  const { data } = useApiQuery({
     path: '/api/protected/example',
     type: ApiQueryType.GET,
     headers: {
@@ -12,4 +12,6 @@ export const useExampleProtectedEndpoint = () => {
     },
     autoInit: Boolean(jwt),
   });
+
+  console.log('data from example endpoint', data);
 };
